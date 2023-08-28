@@ -31,6 +31,7 @@
 % Pueden realizar todos los cambios de implementación que consideren necesarios.
 % Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
+
 update_beliefs(Perc):-
 
 	% El agente olvida todo lo que recordaba
@@ -41,3 +42,35 @@ update_beliefs(Perc):-
 
 	% y recuerda lo que percibió
 	forall(member(Rel, Perc), assert(Rel)).
+
+
+/* @TODO descomentar
+% modificado
+% @TODO usar assert o asserta?
+update_beliefs(Perc):-
+	retractall(time(_)),
+	retractall(direction(_)),
+	retractall(at(MyNode, agente, me)),
+				
+	% Lista de entidades en las creencias actuales
+	findall(at(IdNode, EntityType, IdEntity), at(IdNode, EntityType, IdEntity), List_beliefs_entities),
+	% add new entities
+	forall((member(at(IdNode, EntityType, IdEntity), Perc), not(member(at(IdNode, EntityType, IdEntity), List_beliefs_entities))), 
+		asserta(at(IdNode, EntityType, IdEntity))),
+
+	% Lista de nodos en las creencias actuales
+	findall(node(Id, PosX, PosY, Cost, Connections), node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes),
+	% actualiza el costo y las conexiones de cada nodo encontrado previamente
+	forall((member(node(Id, PosX, PosY, Cost, Connections), Perc), member(node(Id, PosX, PosY, _, _), List_beliefs_nodes)), 
+			(retractall(node(Id, PosX, PosY, _, _)), 
+			asserta(node(Id, PosX, PosY, Cost, Connections)))),
+	% agrega nuevos nodos percibidos
+	forall((member(node(Id, PosX, PosY, Cost, Connections), Perc), not(member(node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes))), 
+		asserta(node(Id, PosX, PosY, Cost, Connections))),
+	
+	member(time(T), Perc),
+	assert(time(T)),
+	
+	member(direction(D), Perc),
+	assert(direction(D)).
+*/
