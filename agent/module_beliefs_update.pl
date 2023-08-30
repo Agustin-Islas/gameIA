@@ -4,7 +4,8 @@
 	    time/1,
 	    node/5,
 	    at/3,
-		direction/1
+		direction/1,
+		elim_entities_disappeared/1
 	  ]).
 
 :- dynamic time/1, node/5, at/3, direction/1.
@@ -31,22 +32,6 @@
 % Pueden realizar todos los cambios de implementación que consideren necesarios.
 % Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
-/*
-update_beliefs(Perc):-
-
-	% El agente olvida todo lo que recordaba
-	retractall(time(_)),
-	retractall(direction(_)),
-	retractall(at(_, _, _)),
-	retractall(node(_, _, _, _, _)),
-
-	% y recuerda lo que percibió
-	forall(member(Rel, Perc), assert(Rel)).
-*/
-
- % @TODO descomentar
-% modificado
-% @TODO usar assert o asserta?
 update_beliefs(Perc):-
 	retractall(time(_)),
 	retractall(direction(_)),
@@ -54,9 +39,22 @@ update_beliefs(Perc):-
 
 	% Lista de entidades en las creencias actuales
 	findall(at(IdNode, EntityType, IdEntity), at(IdNode, EntityType, IdEntity), List_beliefs_entities),
+	% Lista de nodos en las creencias actuales
+	findall(node(Id, PosX, PosY, Cost, Connections), node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes),
 
-	% encontrar todas las entidades que estan el List_beliefs_entinies y tienen el mismo Idnode que los nodos encontrados
-	% en Perc, pero no estan en las entidades de Perc.
+	elim_entities_disappeared(List_beliefs_entities, Perc),
+	actualice_nodes(List_beliefs_nodes, Perc),
+	actualice_entities(List_beliefs_entities, Perc),
+	
+	member(time(T), Perc),
+	assert(time(T)),
+	
+	member(direction(D), Perc),
+	assert(direction(D)).
+
+% encontrar todas las entidades que estan el List_beliefs_entities y tienen el mismo Idnode que los nodos
+% encontrados en Perc, pero no estan en las entidades de Perc.
+elim_entities_disappeared(List_beliefs_entities, Perc):-
 	findall(at(IdNode, EntityType, IdEntity),
 		(member(at(IdNode, _, _), List_beliefs_entities),
 		 member(node(IdNode, _, _, _, _), Perc),
@@ -64,30 +62,24 @@ update_beliefs(Perc):-
 		List_entities_to_elim),
 			
 	% Eliminar las entidades encontradas de List_entities_to_elim de las creencias actuales
-	forall(member(at(IdNode, EntityType, IdEntity), List_entities_to_elim), retractall(at(IdNode, EntityType, IdEntity))),
+	forall(member(at(IdNode, EntityType, IdEntity), List_entities_to_elim),
+			retractall(at(IdNode, EntityType, IdEntity))).
 
-
-	% Lista de nodos en las creencias actuales
-	findall(node(Id, PosX, PosY, Cost, Connections), node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes),
+actualice_nodes(List_beliefs_nodes, Perc):-
 	% actualiza el costo y las conexiones de cada nodo encontrado previamente
 	forall((member(node(Id, PosX, PosY, Cost, Connections), Perc), member(node(Id, PosX, PosY, _, _), List_beliefs_nodes)), 
 			(retractall(node(Id, PosX, PosY, _, _)), 
 			asserta(node(Id, PosX, PosY, Cost, Connections)))),
+	
 	% agrega nuevos nodos percibidos
 	forall((member(node(Id, PosX, PosY, Cost, Connections), Perc), not(member(node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes))), 
-		asserta(node(Id, PosX, PosY, Cost, Connections))),
+		asserta(node(Id, PosX, PosY, Cost, Connections))).
 
-
+actualice_entities(List_beliefs_entities, Perc):-
 	% Actualizacion de relojes
 	forall(((member(at(IdNode, reloj(Old), IdEntity), List_beliefs_entities)), (member(at(IdNode, reloj(New), IdEntity), Perc))),
 			retractall(at(IdNode, reloj(Old), IdEntity))),
 
-	% add new entities
+	% agrega nuevas entidades
 	forall((member(at(IdNode, EntityType, IdEntity), Perc), not(member(at(IdNode, EntityType, IdEntity), List_beliefs_entities))), 
-		asserta(at(IdNode, EntityType, IdEntity))),
-
-	member(time(T), Perc),
-	assert(time(T)),
-	
-	member(direction(D), Perc),
-	assert(direction(D)).
+		asserta(at(IdNode, EntityType, IdEntity))).

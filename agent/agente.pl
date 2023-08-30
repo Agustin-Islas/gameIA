@@ -143,6 +143,9 @@ obtenerMovimiento([X|Xs], X, Xs).
 busqueda_plan(Plan, Destino, Costo):-
  	retractall(plandesplazamiento(_)),
  	retractall(esMeta(_)),
- 	findall(Nodo, at(Nodo, copa, _), Metas), % nuevas metas
+	EntityType \= agente,
+	% @TODO se agregaron todos los tipos de entidades a Metas para que el plan seleccione una meta en
+	% particular siguiendo alguna estrategia en particular.
+ 	findall(Nodo, at(Nodo, EntityType, _), Metas), % nuevas metas
 
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo). % implementado en module_path_finding
