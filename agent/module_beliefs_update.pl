@@ -51,16 +51,21 @@ update_beliefs(Perc):-
 	retractall(time(_)),
 	retractall(direction(_)),
 	retractall(at(MyNode, agente, me)),
-				
+
 	% Lista de entidades en las creencias actuales
 	findall(at(IdNode, EntityType, IdEntity), at(IdNode, EntityType, IdEntity), List_beliefs_entities),
 
-	forall(((member(at(IdNode, reloj(Old), IdEntity), List_beliefs_entities)), (member(at(IdNode, reloj(New), IdEntity), Perc))),
-			retractall(at(IdNode, reloj(Old), IdEntity))),
+	% encontrar todas las entidades que estan el List_beliefs_entinies y tienen el mismo Idnode que los nodos encontrados
+	% en Perc, pero no estan en las entidades de Perc.
+	findall(at(IdNode, EntityType, IdEntity),
+		(member(at(IdNode, _, _), List_beliefs_entities),
+		 member(node(IdNode, _, _, _, _), Perc),
+		 not(member(at(IdNode, _, _), Perc))),
+		List_entities_to_elim),
+			
+	% Eliminar las entidades encontradas de List_entities_to_elim de las creencias actuales
+	forall(member(at(IdNode, EntityType, IdEntity), List_entities_to_elim), retractall(at(IdNode, EntityType, IdEntity))),
 
-	% add new entities
-	forall((member(at(IdNode, EntityType, IdEntity), Perc), not(member(at(IdNode, EntityType, IdEntity), List_beliefs_entities))), 
-		asserta(at(IdNode, EntityType, IdEntity))),
 
 	% Lista de nodos en las creencias actuales
 	findall(node(Id, PosX, PosY, Cost, Connections), node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes),
@@ -71,7 +76,16 @@ update_beliefs(Perc):-
 	% agrega nuevos nodos percibidos
 	forall((member(node(Id, PosX, PosY, Cost, Connections), Perc), not(member(node(Id, PosX, PosY, Cost, Connections), List_beliefs_nodes))), 
 		asserta(node(Id, PosX, PosY, Cost, Connections))),
-	
+
+
+	% Actualizacion de relojes
+	forall(((member(at(IdNode, reloj(Old), IdEntity), List_beliefs_entities)), (member(at(IdNode, reloj(New), IdEntity), Perc))),
+			retractall(at(IdNode, reloj(Old), IdEntity))),
+
+	% add new entities
+	forall((member(at(IdNode, EntityType, IdEntity), Perc), not(member(at(IdNode, EntityType, IdEntity), List_beliefs_entities))), 
+		asserta(at(IdNode, EntityType, IdEntity))),
+
 	member(time(T), Perc),
 	assert(time(T)),
 	
