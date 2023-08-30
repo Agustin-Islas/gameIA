@@ -31,7 +31,7 @@
 % Pueden realizar todos los cambios de implementación que consideren necesarios.
 % Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
-
+/*
 update_beliefs(Perc):-
 
 	% El agente olvida todo lo que recordaba
@@ -42,9 +42,9 @@ update_beliefs(Perc):-
 
 	% y recuerda lo que percibió
 	forall(member(Rel, Perc), assert(Rel)).
+*/
 
-
-/* @TODO descomentar
+ % @TODO descomentar
 % modificado
 % @TODO usar assert o asserta?
 update_beliefs(Perc):-
@@ -54,6 +54,10 @@ update_beliefs(Perc):-
 				
 	% Lista de entidades en las creencias actuales
 	findall(at(IdNode, EntityType, IdEntity), at(IdNode, EntityType, IdEntity), List_beliefs_entities),
+
+	forall(((member(at(IdNode, reloj(Old), IdEntity), List_beliefs_entities)), (member(at(IdNode, reloj(New), IdEntity), Perc))),
+			retractall(at(IdNode, reloj(Old), IdEntity))),
+
 	% add new entities
 	forall((member(at(IdNode, EntityType, IdEntity), Perc), not(member(at(IdNode, EntityType, IdEntity), List_beliefs_entities))), 
 		asserta(at(IdNode, EntityType, IdEntity))),
@@ -73,4 +77,3 @@ update_beliefs(Perc):-
 	
 	member(direction(D), Perc),
 	assert(direction(D)).
-*/
