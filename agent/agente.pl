@@ -11,7 +11,8 @@
  	buscar_plan_desplazamiento/4,
  	raiz/1,
  	padre/2,
- 	esMeta/1
+ 	esMeta/1,
+	seleccionar/3
 ]).
 
 :- use_module(extras, [
@@ -76,22 +77,16 @@ run(Perc, Action, Text, Beliefs):-
 % Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
 % Si estoy en la misma posición que una copa, intento levantarla.
-decide_action(Action, 'Quiero levantar una copa...'):-
+decide_action(Action, 'Quiero levantar una copa...') :-
     at(MyNode, agente, me),
     at(MyNode, copa, IdGold),
     node(MyNode, PosX, PosY, _, _),
     Action = levantar_tesoro(IdGold, PosX, PosY),
-    retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
+    retractall(at(MyNode, _, IdGold)).
+	% retractall(plandesplazamiento(_)).
 
 % Me muevo a una posición vecina seleccionada de manera aleatoria.
-decide_action(Action, 'Me muevo a la posicion de al lado...'):-
-	at(MyNode, agente, me),
-	node(MyNode, _, _, _, AdyList),
-	length(AdyList, LenAdyList), LenAdyList > 0,
-	random_member([IdAdyNode, _CostAdyNode], AdyList),
-	!,
-	Action = avanzar(IdAdyNode).
+
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
@@ -100,13 +95,15 @@ decide_action(Action, 'Avanzar...'):-
 	LargoPlan > 0,
 	!,
 	obtenerMovimiento(Plan, Destino, Resto),
-	retractall(plandesplazamiento(_)),
+	% retractall(plandesplazamiento(_)),
 	assert(plandesplazamiento(Resto)),
 	Action = Destino.
 	
 % Si no tengo un plan guardado, busco uno nuevo.
 decide_action(Action, 'Avanzar con nuevo plan...'):-
  	busqueda_plan(Plan, _Destino, _Costo),
+	write('\n\n imprimiendo plan \n\n'),
+	write(Plan),
 	Plan \= [],
 	obtenerMovimiento(Plan, Action, Resto),
 	assert(plandesplazamiento(Resto)).
@@ -143,9 +140,9 @@ obtenerMovimiento([X|Xs], X, Xs).
 busqueda_plan(Plan, Destino, Costo):-
  	retractall(plandesplazamiento(_)),
  	retractall(esMeta(_)),
-	EntityType \= agente,
+	
 	% @TODO se agregaron todos los tipos de entidades a Metas para que el plan seleccione una meta en
 	% particular siguiendo alguna estrategia en particular.
- 	findall(Nodo, at(Nodo, EntityType, _), Metas), % nuevas metas
-
- 	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo). % implementado en module_path_finding
+ 	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
+	seleccionar(Meta1, Metas, Resto),
+ 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo). % implementado en module_path_finding
