@@ -82,8 +82,8 @@ decide_action(Action, 'Quiero levantar una copa...') :-
     at(MyNode, copa, IdGold),
     node(MyNode, PosX, PosY, _, _),
     Action = levantar_tesoro(IdGold, PosX, PosY),
-    retractall(at(MyNode, _, IdGold)).
-	% retractall(plandesplazamiento(_)).
+    retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
 
 % Me muevo a una posición vecina seleccionada de manera aleatoria.
 
@@ -95,7 +95,7 @@ decide_action(Action, 'Avanzar...'):-
 	LargoPlan > 0,
 	!,
 	obtenerMovimiento(Plan, Destino, Resto),
-	% retractall(plandesplazamiento(_)),
+	retractall(plandesplazamiento(_)),
 	assert(plandesplazamiento(Resto)),
 	Action = Destino.
 	
@@ -145,4 +145,5 @@ busqueda_plan(Plan, Destino, Costo):-
 	% particular siguiendo alguna estrategia en particular.
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
 	seleccionar(Meta1, Metas, Resto),
- 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo). % implementado en module_path_finding
+ 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo),
+	write('PLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
