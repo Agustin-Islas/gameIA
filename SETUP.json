@@ -1,7 +1,7 @@
 {
     "tiempo": 20,
     "mostrar_percepcion": true, 
-    "player_init_pos": [0, 0],
+    "player_init_pos": [10, 10],
     "rango": 8,
     "mapa": 1,
     "cantidad_premios": 20,

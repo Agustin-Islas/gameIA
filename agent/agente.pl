@@ -85,6 +85,38 @@ decide_action(Action, 'Quiero levantar una copa...') :-
     retractall(at(MyNode, _, IdGold)),
 	retractall(plandesplazamiento(_)).
 
+decide_action(Action, 'Quiero levantar una pocion...') :-
+	at(MyNode, agente, me),
+	at(MyNode, pocion, IdGold),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar_tesoro(IdGold, PosX, PosY),
+	retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
+
+decide_action(Action, 'Quiero levantar un reloj...') :-
+	at(MyNode, agente, me),
+	at(MyNode, reloj(_), IdGold),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar_tesoro(IdGold, PosX, PosY),
+	retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
+
+decide_action(Action, 'Quiero levantar un cajon...') :-
+	at(MyNode, agente, me),
+	at(MyNode, cofre, IdGold),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar_tesoro(IdGold, PosX, PosY),
+	retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
+
+decide_action(Action, 'Quiero levantar un diamante...') :-
+	at(MyNode, agente, me),
+	at(MyNode, diamante, IdGold),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar_tesoro(IdGold, PosX, PosY),
+	retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
+
 % Me muevo a una posición vecina seleccionada de manera aleatoria.
 /*
 decide_action(Action, 'Me muevo a la posicion de al lado...'):-
@@ -158,5 +190,7 @@ busqueda_plan(Plan, Destino, Costo):-
 	% particular siguiendo alguna estrategia en particular.
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
 	seleccionar(Meta1, Metas, Resto),
- 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo),
-	write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
+	at(Meta1, Entidad, _),
+	write('Busco camino para la meta '), write(Entidad), write(' ubicada en '), write(Meta1), write(' \n'),
+ 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo).
+	% write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
