@@ -1,5 +1,5 @@
 {
-    "tiempo": 20,
+    "tiempo": 50,
     "mostrar_percepcion": true, 
     "player_init_pos": [10, 10],
     "rango": 8,

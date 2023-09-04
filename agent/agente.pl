@@ -83,7 +83,8 @@ decide_action(Action, 'Quiero levantar una copa...') :-
     node(MyNode, PosX, PosY, _, _),
     Action = levantar_tesoro(IdGold, PosX, PosY),
     retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
+	retractall(plandesplazamiento(_)),
+	!.
 
 decide_action(Action, 'Quiero levantar una pocion...') :-
 	at(MyNode, agente, me),
@@ -91,7 +92,8 @@ decide_action(Action, 'Quiero levantar una pocion...') :-
 	node(MyNode, PosX, PosY, _, _),
 	Action = levantar_tesoro(IdGold, PosX, PosY),
 	retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
+	retractall(plandesplazamiento(_)),
+	!.
 
 decide_action(Action, 'Quiero levantar un reloj...') :-
 	at(MyNode, agente, me),
@@ -99,7 +101,8 @@ decide_action(Action, 'Quiero levantar un reloj...') :-
 	node(MyNode, PosX, PosY, _, _),
 	Action = levantar_tesoro(IdGold, PosX, PosY),
 	retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
+	retractall(plandesplazamiento(_)),
+	!.
 
 decide_action(Action, 'Quiero levantar un cajon...') :-
 	at(MyNode, agente, me),
@@ -107,7 +110,8 @@ decide_action(Action, 'Quiero levantar un cajon...') :-
 	node(MyNode, PosX, PosY, _, _),
 	Action = levantar_tesoro(IdGold, PosX, PosY),
 	retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
+	retractall(plandesplazamiento(_)),
+	!.
 
 decide_action(Action, 'Quiero levantar un diamante...') :-
 	at(MyNode, agente, me),
@@ -115,18 +119,8 @@ decide_action(Action, 'Quiero levantar un diamante...') :-
 	node(MyNode, PosX, PosY, _, _),
 	Action = levantar_tesoro(IdGold, PosX, PosY),
 	retractall(at(MyNode, _, IdGold)),
-	retractall(plandesplazamiento(_)).
-
-% Me muevo a una posición vecina seleccionada de manera aleatoria.
-/*
-decide_action(Action, 'Me muevo a la posicion de al lado...'):-
-	at(MyNode, agente, me),
-	node(MyNode, _, _, _, AdyList),
-	length(AdyList, LenAdyList), LenAdyList > 0,
-	random_member([IdAdyNode, _CostAdyNode], AdyList),
-	!,
-	Action = avanzar(IdAdyNode).
-*/
+	retractall(plandesplazamiento(_)),
+	!.
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
@@ -150,7 +144,8 @@ decide_action(Action, 'Avanzar con nuevo plan...'):-
 	obtenerMovimiento(Plan, Action, Resto),
 	write('\n action: '),write(Action),write('\n'),
 	assert(plandesplazamiento(Resto)),
-	write('\n entra buscar plan\n'),!.
+	write('\n entra buscar plan\n'),
+	!.
 
 % Giro en sentido horario, para conocer mas terreno.
 decide_action(Action, 'Girar para conocer el territorio...'):-
