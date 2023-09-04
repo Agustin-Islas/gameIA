@@ -98,26 +98,31 @@ decide_action(Action, 'Me muevo a la posicion de al lado...'):-
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
+	write('\n entra avanzar1\n'),
 	plandesplazamiento(Plan),
+	write('\n entra avanzar2\n'),
 	length(Plan, LargoPlan),
 	LargoPlan > 0,
 	!,
-	obtenerMovimiento(Plan, Destino, Resto),
+	obtenerMovimiento(Plan, Action, Resto),
 	retractall(plandesplazamiento(_)),
-	assert(plandesplazamiento(Resto)),
-	Action = Destino.
+	assert(plandesplazamiento(Resto)).
 	
 % Si no tengo un plan guardado, busco uno nuevo.
 decide_action(Action, 'Avanzar con nuevo plan...'):-
- 	busqueda_plan(Plan, _Destino, _Costo),
+	write('\n entra plan\n'),
+	busqueda_plan(Plan, _Destino, _Costo),
 	write('\n\n imprimiendo plan \n\n'),
 	write(Plan),
 	Plan \= [],
 	obtenerMovimiento(Plan, Action, Resto),
-	assert(plandesplazamiento(Resto)).
+	write('\n action: '),write(Action),write('\n'),
+	assert(plandesplazamiento(Resto)),
+	write('\n entra buscar plan\n'),!.
 
 % Giro en sentido horario, para conocer mas terreno.
 decide_action(Action, 'Girar para conocer el territorio...'):-
+	write('\n entra girar\n'),
 	(
 		direction(w)
 		-> Action = girar(d)
@@ -154,4 +159,4 @@ busqueda_plan(Plan, Destino, Costo):-
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
 	seleccionar(Meta1, Metas, Resto),
  	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo),
-	write('PLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
+	write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
