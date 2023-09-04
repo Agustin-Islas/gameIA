@@ -20,7 +20,6 @@
 ]).
 
 :- dynamic plandesplazamiento/1.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % run(+Perc, -Action, -Text, -Beliefs)
 %
@@ -162,6 +161,16 @@ decide_action(Action, 'Girar para conocer el territorio...'):-
 			)	
 	).
 
+% Me muevo a una posición vecina seleccionada de manera aleatoria.
+decide_action(Action, 'Me muevo a la posicion de al lado...'):-
+	write('\n entra random\n'),
+	at(MyNode, agente, me),
+	node(MyNode, _, _, _, AdyList),
+	length(AdyList, LenAdyList), LenAdyList > 0,
+	random_member([IdAdyNode, _CostAdyNode], AdyList),
+	!,
+	Action = avanzar(IdAdyNode).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % obtenerMovimiento(?Lista, ?Movimiento, ?Resto)
@@ -187,5 +196,5 @@ busqueda_plan(Plan, Destino, Costo):-
 	seleccionar(Meta1, Metas, Resto),
 	at(Meta1, Entidad, _),
 	write('Busco camino para la meta '), write(Entidad), write(' ubicada en '), write(Meta1), write(' \n'),
- 	buscar_plan_desplazamiento([Meta1], Plan, Destino, Costo).
+ 	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo).
 	% write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
