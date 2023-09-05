@@ -8,6 +8,8 @@
 
 :- use_module(module_beliefs_update, [node/5, at/3]).
 
+:- use_module(extras, [insertarOrdenado/3]).
+
 :- dynamic padre/2, raiz/1, esMeta/1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,7 +203,7 @@ agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visi
 	delete(Frontera, [IdNodo, CurrentCost], NuevaFrontera1), 
 	retractall(padre(IdNodo, _)),
 	asserta(padre(IdNodo, Padre)),
-	agregarAlFinal(NuevaFrontera1, [IdNodo, F], NuevaFrontera). % actualizo la frontera
+	insertarOrdenado([IdNodo, F], NuevaFrontera1, NuevaFrontera). % actualizo la frontera
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, NuevosVisitados, NuevaFrontera) :-
 	member([IdNodo, CurrentCost], Visitados), % si pertenece a los visitados
@@ -211,7 +213,7 @@ agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Nuev
 	delete(Visitados, [IdNodo, CurrentCost], NuevosVisitados), 
 	retractall(padre(IdNodo, _)),
 	asserta(padre(IdNodo, Padre)),
-	agregarAlFinal(Frontera, [IdNodo, F], NuevaFrontera). % actualizo la frontera
+	insertarOrdenado([IdNodo, F], Frontera, NuevaFrontera). % actualizo la frontera
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, Frontera) :-
 	member([IdNodo, _], Visitados)
@@ -230,7 +232,7 @@ agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visi
 	% si no se da ningun caso previo pero el nodo ya pertenece a la frontera, no hago nada
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera) :-
-	agregarAlFinal(Frontera, [IdNodo, F], NuevaFrontera)
+	insertarOrdenado([IdNodo, F], Frontera, NuevaFrontera)
 	% ,
 	% write('(( AGREGANDO NODO '), write(IdNodo), write(' A LA FRONTERA ))\n')
 	.

@@ -1,9 +1,9 @@
 {
     "tiempo": 60,
     "mostrar_percepcion": true, 
-    "player_init_pos": [10, 10],
+    "player_init_pos": [28, 38],
     "rango": 8,
-    "mapa": 1,
+    "mapa": 2,
     "cantidad_premios": 20,
     "cantidad_pociones": 20,
     "cantidad_relojes": 3

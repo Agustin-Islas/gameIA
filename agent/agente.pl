@@ -171,8 +171,8 @@ decide_action(Action, 'Me muevo a la posicion de al lado...'):-
 	!,
 	% write('\n entra random, me muevo a '), write(IdAdyNode), write('\n'),
 	retractall(vueltacompleta(_)),
-	Action = avanzar(IdAdyNode),
-	write(Action).
+	Action = avanzar(IdAdyNode).
+	% write(Action).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
