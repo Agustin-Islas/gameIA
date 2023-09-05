@@ -55,7 +55,6 @@ run(Perc, Action, Text, Beliefs):-
 	findall(at(X, Y, Z), at(X, Y, Z), Beliefs).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TO-DO
 %
 % decide_action(-Action, -Text)
 %
@@ -63,17 +62,13 @@ run(Perc, Action, Text, Beliefs):-
 % Text es un texto con comillas simples como 'hola' que será mostrado en la pantalla del juego.
 %
 % En la implementación siguiente:
-% El primer caso (1), sirve de ejemplo para levantar un objeto del terreno.
-% El segundo caso (2) del predicado siempre tiene éxito, y hace que el agente se mueva de manera aleatoria.
-% El tercer caso (3) permite al agente ejecutar la siguiente acción de movimiento de un plan guardado, calculado previamente.
-% El cuarto caso (4) permite obtener un nuevo plan de movimiento usando A*.
-% El quinto caso (5) hace que el agente gire en su posición, en sentido horario.
+% Los primeros 5 casos): sirven para que el agente pueda levantar objetos del suelo.
+% El sexto caso (6) permite al agente ejecutar la siguiente acción de movimiento de un plan guardado,
+% calculado previamente.
+% El septimo caso (7) permite obtener un nuevo plan de movimiento usando A*.
+% El octavo caso (8) hace que el agente gire en su posición, en sentido horario.
+% El noveno caso (9) del predicado siempre tiene éxito, y hace que el agente se mueva de manera aleatoria.
 %
-% Deberán completar la implementación del algoritmo de búsqueda A* para que funcionen los casos (3) y (4)
-% Y eliminar el caso (2), para permitir al agente seguir el plan de movimientos.
-%
-% Pueden realizar todos los cambios de implementación que consideren necesarios.
-% Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
 % Si estoy en la misma posición que una copa, intento levantarla.
 decide_action(Action, 'Quiero levantar una copa...') :-
@@ -85,6 +80,7 @@ decide_action(Action, 'Quiero levantar una copa...') :-
 	retractall(plandesplazamiento(_)),
 	!.
 
+% Si estoy en la misma posición que una pocion, intento levantarla.
 decide_action(Action, 'Quiero levantar una pocion...') :-
 	at(MyNode, agente, me),
 	at(MyNode, pocion, IdGold),
@@ -94,6 +90,7 @@ decide_action(Action, 'Quiero levantar una pocion...') :-
 	retractall(plandesplazamiento(_)),
 	!.
 
+% Si estoy en la misma posición que un reloj, intento levantarlo.
 decide_action(Action, 'Quiero levantar un reloj...') :-
 	at(MyNode, agente, me),
 	at(MyNode, reloj(_), IdGold),
@@ -103,6 +100,7 @@ decide_action(Action, 'Quiero levantar un reloj...') :-
 	retractall(plandesplazamiento(_)),
 	!.
 
+% Si estoy en la misma posición que un cajón, intento levantarlo.
 decide_action(Action, 'Quiero levantar un cajon...') :-
 	at(MyNode, agente, me),
 	at(MyNode, cofre, IdGold),
@@ -112,6 +110,7 @@ decide_action(Action, 'Quiero levantar un cajon...') :-
 	retractall(plandesplazamiento(_)),
 	!.
 
+% Si estoy en la misma posición que un diamante, intento levantarlo.
 decide_action(Action, 'Quiero levantar un diamante...') :-
 	at(MyNode, agente, me),
 	at(MyNode, diamante, IdGold),
@@ -123,9 +122,7 @@ decide_action(Action, 'Quiero levantar un diamante...') :-
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
-	% write('\n entra avanzar1\n'),
 	plandesplazamiento(Plan),
-	% write('\n entra avanzar2\n'),
 	length(Plan, LargoPlan),
 	LargoPlan > 0,
 	!,
@@ -135,15 +132,11 @@ decide_action(Action, 'Avanzar...'):-
 	
 % Si no tengo un plan guardado, busco uno nuevo.
 decide_action(Action, 'Avanzar con nuevo plan...'):-
-	% write('\n entra plan\n'),
 	busqueda_plan(Plan, _Destino, _Costo),
-	% write('\n\n imprimiendo plan \n\n'),
 	write(Plan),
 	Plan \= [],
 	obtenerMovimiento(Plan, Action, Resto),
-	% write('\n action: '),write(Action),write('\n'),
 	assert(plandesplazamiento(Resto)),
-	% write('\n entra buscar plan\n'),
 	!.
 
 % Giro en sentido horario, para conocer mas terreno.
@@ -169,10 +162,8 @@ decide_action(Action, 'Me muevo a la posicion de al lado...'):-
 	length(AdyList, LenAdyList), LenAdyList > 0,
 	random_member([IdAdyNode, _CostAdyNode], AdyList),
 	!,
-	% write('\n entra random, me muevo a '), write(IdAdyNode), write('\n'),
 	retractall(vueltacompleta(_)),
 	Action = avanzar(IdAdyNode).
-	% write(Action).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -192,12 +183,8 @@ obtenerMovimiento([X|Xs], X, Xs).
 busqueda_plan(Plan, Destino, Costo):-
  	retractall(plandesplazamiento(_)),
  	retractall(esMeta(_)),
-	
-	% @TODO se agregaron todos los tipos de entidades a Metas para que el plan seleccione una meta en
-	% particular siguiendo alguna estrategia en particular.
+
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
 	seleccionar(Meta1, Metas, Resto),
 	at(Meta1, Entidad, _),
-	% write('Busco camino para la meta '), write(Entidad), write(' ubicada en '), write(Meta1), write(' \n'),
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo).
-	% write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding

@@ -118,13 +118,9 @@ buscar(Frontera, _, _M, Nodo):-
 
 buscar(Frontera, Visitados, Metas, MM):-
 	seleccionar(Nodo, Frontera, FronteraSinNodo), % selecciona primer nodo de la frontera
-	% write('[[[===========================================\nFRONTERA:: '), write(Frontera), write(' |||\n'),
-	% write('||| NODO ACTUAL:: '), write(Nodo), write(' |||\n '),
-	generarVecinos(Nodo, Vecinos), % genera los vecinos del nodo - TO-DO
+	generarVecinos(Nodo, Vecinos), % genera los vecinos del nodo
 	agregarAlPrincipio(Nodo, Visitados, NuevosVisitados), % agrega el nodo a lista de visitados
-	% write('||| VISITADOS:: '), write(NuevosVisitados), write(' |||\n\n '),
-	agregar(FronteraSinNodo, Vecinos, NuevaFrontera, NuevosVisitados, VisitadosOut, Nodo, Metas), % agrega vecinos a la frontera - TO-DO
-	% write('===========================================]]]\n\n\n\n\n'),
+	agregar(FronteraSinNodo, Vecinos, NuevaFrontera, NuevosVisitados, VisitadosOut, Nodo, Metas), % agrega vecinos a la frontera
 	buscar(NuevaFrontera, VisitadosOut, Metas, MM). % continua la busqueda con la nueva frontera
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -155,7 +151,7 @@ agregarPadreSiCorresponde(Vec, Nodo) :- asserta(padre(Vec, Nodo)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-% agregar(+FronteraSinNodo, +Vecinos, -Frontera, +Visitados, +Nodo, +Metas), 
+% agregar(+FronteraSinNodo, +Vecinos, -Frontera, +Visitados, +Nodo, +Metas), @TODO falta un parametro
 % 
 % Agrega vecinos a la frontera
 % 
@@ -164,17 +160,15 @@ agregar(FronteraSinNodo, [], FronteraSinNodo, Visitados, Visitados, _, _). % cas
 agregar(FronteraSinNodo, Vecinos, Frontera, Visitados, VisitadosOut, [Nodo, Costo], Metas) :-
 	seleccionar([V, CV], Vecinos, RestoVecinos), % agarro un vecino
 	agregar(FronteraSinNodo, RestoVecinos, NuevaFrontera1, Visitados, VisitadosOut1, [Nodo, Costo], Metas), % itero sobre el resto de vecinos
-	% write('Busco un camino para el nodo '), write(V), write('... '),
 	encontrarCamino(V, Camino), 
 	costoCamino(Camino, G), % calculo cuanto cuesta llegar desde la raiz hasta ese vecino
-	% write('Camino valido con costo total: '), write(G), write('\n'),
-	recorrerMetas(Nodo, [V, CV], G, Metas, NuevaFrontera1, VisitadosOut1, VisitadosOut, Frontera). % ni idea
+	recorrerMetas(Nodo, [V, CV], G, Metas, NuevaFrontera1, VisitadosOut1, VisitadosOut, Frontera).
 	
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-% recorrerMetas(+Nodo, +G, +Metas, ?Frontera), 
-% 
+% recorrerMetas(+Nodo, +G, +Metas, ?Frontera), @TODO actualizar parametros
+%
 % Recorre las metas posibles y calcula el valor heuristico para cada una.
 % 
 recorrerMetas(_, _, _, [], Frontera, Visitados, Visitados, Frontera). % caso base
@@ -183,23 +177,20 @@ recorrerMetas(Padre, [Nodo, C], G, Metas, Frontera, Visitados, NuevosVisitados2,
 
 	seleccionar(Meta, Metas, RestoMetas), % selecciono la primer meta 
 	recorrerMetas(Padre, [Nodo, C], G, RestoMetas, Frontera, Visitados, NuevosVisitados1, NuevaFrontera1), % itero sobre el resto de metas
-	% write('Calculando H para nodo '), write(Nodo), write(' y meta: '), write(Meta), write(' '),
 	calcularH(Nodo, Meta, H), % calculo H para el nodo actual y la meta actual
 	F is G + H, % calculo F como la suma que vimos en clase y eso
 	agregarAListaCorrespondiente(Padre, [Nodo, C], F, NuevaFrontera1, NuevosVisitados1, NuevosVisitados2, NuevaFrontera2). % agrego si corresponde
-	% write('post-agregar\n\n').
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-%
-%
-%
-%
+% agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera)
+% @TODO escribir bien los parametros.
+% Actualiza la frontera y los visitados si corresponde.
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera) :-
 	member([IdNodo, CurrentCost], Frontera), % si pertenece a la frontera 
 	F < CurrentCost, % y el nuevo F es menor al ya calculado
 	!,
-	% write('(( AGREGANDO NODO '), write(IdNodo), write(' A LA FRONTERA ))\n'),
 	delete(Frontera, [IdNodo, CurrentCost], NuevaFrontera1), 
 	retractall(padre(IdNodo, _)),
 	asserta(padre(IdNodo, Padre)),
@@ -209,36 +200,21 @@ agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Nuev
 	member([IdNodo, CurrentCost], Visitados), % si pertenece a los visitados
 	F < CurrentCost, % y el nuevo F es menor al ya calculado
 	!,
-	% write('(( AGREGANDO NODO '), write(IdNodo), write(' A LA FRONTERA ))\n'),
 	delete(Visitados, [IdNodo, CurrentCost], NuevosVisitados), 
 	retractall(padre(IdNodo, _)),
 	asserta(padre(IdNodo, Padre)),
 	insertarOrdenado([IdNodo, F], Frontera, NuevaFrontera). % actualizo la frontera
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, Frontera) :-
-	member([IdNodo, _], Visitados)
-	% ,
-	% si pertenece a los visitados
-	% write('(( SALTEANDO NODO '), write(IdNodo), write('))\n')
-	.
-	% entonces  el nuevo F es mayor o igual al ya calculado
-	%!. % salteo el nodo
+	member([IdNodo, _], Visitados). % si pertenece a los visitados
+	% El nuevo F es mayor o igual al ya calculado
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, Frontera) :-
-	member([IdNodo, _], Frontera)
-	% ,
-	% write('(( SALTEANDO NODO '), write(IdNodo), write('))\n')
-	.
+	member([IdNodo, _], Frontera).
 	% si no se da ningun caso previo pero el nodo ya pertenece a la frontera, no hago nada
 
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera) :-
-	insertarOrdenado([IdNodo, F], Frontera, NuevaFrontera)
-	% ,
-	% write('(( AGREGANDO NODO '), write(IdNodo), write(' A LA FRONTERA ))\n')
-	.
-
-	% assert(padre(IdNodo, Padre)).
-	% caso final, agrego el nodo a la frontera
+	insertarOrdenado([IdNodo, F], Frontera, NuevaFrontera). % caso final, agrego el nodo a la frontera
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
