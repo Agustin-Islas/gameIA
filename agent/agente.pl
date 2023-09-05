@@ -19,7 +19,7 @@
 	append3/4
 ]).
 
-:- dynamic plandesplazamiento/1.
+:- dynamic plandesplazamiento/1, vueltacompleta/1.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % run(+Perc, -Action, -Text, -Beliefs)
 %
@@ -123,9 +123,9 @@ decide_action(Action, 'Quiero levantar un diamante...') :-
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
-	write('\n entra avanzar1\n'),
+	% write('\n entra avanzar1\n'),
 	plandesplazamiento(Plan),
-	write('\n entra avanzar2\n'),
+	% write('\n entra avanzar2\n'),
 	length(Plan, LargoPlan),
 	LargoPlan > 0,
 	!,
@@ -135,20 +135,21 @@ decide_action(Action, 'Avanzar...'):-
 	
 % Si no tengo un plan guardado, busco uno nuevo.
 decide_action(Action, 'Avanzar con nuevo plan...'):-
-	write('\n entra plan\n'),
+	% write('\n entra plan\n'),
 	busqueda_plan(Plan, _Destino, _Costo),
-	write('\n\n imprimiendo plan \n\n'),
+	% write('\n\n imprimiendo plan \n\n'),
 	write(Plan),
 	Plan \= [],
 	obtenerMovimiento(Plan, Action, Resto),
-	write('\n action: '),write(Action),write('\n'),
+	% write('\n action: '),write(Action),write('\n'),
 	assert(plandesplazamiento(Resto)),
-	write('\n entra buscar plan\n'),
+	% write('\n entra buscar plan\n'),
 	!.
 
 % Giro en sentido horario, para conocer mas terreno.
 decide_action(Action, 'Girar para conocer el territorio...'):-
-	write('\n entra girar\n'),
+	not(vueltacompleta(_)),
+	!,
 	(
 		direction(w)
 		-> Action = girar(d)
@@ -156,20 +157,22 @@ decide_action(Action, 'Girar para conocer el territorio...'):-
 			-> Action = girar(s)
 			; ( direction(s)
 				-> Action = girar(a)
-				; Action = girar(w)
+				; Action = girar(w), asserta(vueltacompleta(w))
 				)			
-			)	
+		)
 	).
 
 % Me muevo a una posición vecina seleccionada de manera aleatoria.
 decide_action(Action, 'Me muevo a la posicion de al lado...'):-
-	write('\n entra random\n'),
 	at(MyNode, agente, me),
 	node(MyNode, _, _, _, AdyList),
 	length(AdyList, LenAdyList), LenAdyList > 0,
 	random_member([IdAdyNode, _CostAdyNode], AdyList),
 	!,
-	Action = avanzar(IdAdyNode).
+	% write('\n entra random, me muevo a '), write(IdAdyNode), write('\n'),
+	retractall(vueltacompleta(_)),
+	Action = avanzar(IdAdyNode),
+	write(Action).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -195,6 +198,6 @@ busqueda_plan(Plan, Destino, Costo):-
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
 	seleccionar(Meta1, Metas, Resto),
 	at(Meta1, Entidad, _),
-	write('Busco camino para la meta '), write(Entidad), write(' ubicada en '), write(Meta1), write(' \n'),
+	% write('Busco camino para la meta '), write(Entidad), write(' ubicada en '), write(Meta1), write(' \n'),
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo).
 	% write('\nPLAN DE DESPLAZAMIENDO NO FALLA\n'). % implementado en module_path_finding
