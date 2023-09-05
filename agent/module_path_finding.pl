@@ -137,13 +137,19 @@ agregarAlFinal(Lista, Nodo, Resultado) :- append(Lista, [Nodo], Resultado).
 %
 % generarVecinos(+Nodo, -Vecinos)
 %
-% Genera los vecinos del nodo Nodo.
+%   Genera los vecinos del nodo Nodo y los retorna en la lista Vecinos.
 %
 generarVecinos([Nodo, _], VecinosExistentes) :- 
 	node(Nodo, _, _, _, Vecinos),
 	findall( [N, C], (member([N, C], Vecinos), node(N, _, _, C, _)), VecinosExistentes),
 	forall(member([Vec, _], VecinosExistentes), agregarPadreSiCorresponde(Vec, Nodo)).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%
+% agregarPadreSiCorresponde(+Nodo, +Padre)
+%
+%   Reconoce a Padre como padre de Nodo si Nodo no tenía un padre previamente.
+%
 
 agregarPadreSiCorresponde(Vec, _) :- padre(Vec, _).
 
@@ -151,10 +157,12 @@ agregarPadreSiCorresponde(Vec, Nodo) :- asserta(padre(Vec, Nodo)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-% agregar(+FronteraSinNodo, +Vecinos, -Frontera, +Visitados, +Nodo, +Metas), @TODO falta un parametro
+% agregar(+FronteraSinNodo, +Vecinos, -NuevaFrontera, +Visitados, -NuevosVisitados, +Nodo, +Metas), @TODO falta un parametro
 % 
-% Agrega vecinos a la frontera
-% 
+%  Agrega cada vecino de la lista Vecinos a la frontera si corresponde. 
+%  La frontera y los nodos visitados cuando se modifican se retornan en 
+%     NuevaFrontera y NuevosVisitados respectivamente.
+%
 agregar(FronteraSinNodo, [], FronteraSinNodo, Visitados, Visitados, _, _). % caso base
 
 agregar(FronteraSinNodo, Vecinos, Frontera, Visitados, VisitadosOut, [Nodo, Costo], Metas) :-
@@ -167,26 +175,40 @@ agregar(FronteraSinNodo, Vecinos, Frontera, Visitados, VisitadosOut, [Nodo, Cost
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-% recorrerMetas(+Nodo, +G, +Metas, ?Frontera), @TODO actualizar parametros
+% recorrerMetas(+Padre, +[Nodo, C], +G, +Metas, +Frontera, +Visitados, -NuevosVisitados, -NuevaFrontera)
 %
-% Recorre las metas posibles y calcula el valor heuristico para cada una.
+%   Recorre las metas posibles y calcula el valor heuristico para cada una.
+%   Caso base, no hay metas.
+%   Caso recursivo, selecciono la primer meta, itero sobre el resto de metas, 
+%     calculo el valor heurístico H desde Nodo hasta la meta, 
+%     calculo el valor F como la suma G + H,
+%     y luego agrego a la frontera si corresponde hacerlo.
 % 
+
 recorrerMetas(_, _, _, [], Frontera, Visitados, Visitados, Frontera). % caso base
 
-recorrerMetas(Padre, [Nodo, C], G, Metas, Frontera, Visitados, NuevosVisitados2, NuevaFrontera2) :-
+recorrerMetas(Padre, [Nodo, C], G, Metas, Frontera, Visitados, NuevosVisitados, NuevaFrontera) :-
 
 	seleccionar(Meta, Metas, RestoMetas), % selecciono la primer meta 
 	recorrerMetas(Padre, [Nodo, C], G, RestoMetas, Frontera, Visitados, NuevosVisitados1, NuevaFrontera1), % itero sobre el resto de metas
 	calcularH(Nodo, Meta, H), % calculo H para el nodo actual y la meta actual
 	F is G + H, % calculo F como la suma que vimos en clase y eso
-	agregarAListaCorrespondiente(Padre, [Nodo, C], F, NuevaFrontera1, NuevosVisitados1, NuevosVisitados2, NuevaFrontera2). % agrego si corresponde
+	agregarAListaCorrespondiente(Padre, [Nodo, C], F, NuevaFrontera1, NuevosVisitados1, NuevosVisitados, NuevaFrontera). % agrego si corresponde
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 %
-% agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera)
-% @TODO escribir bien los parametros.
-% Actualiza la frontera y los visitados si corresponde.
+% agregarAListaCorrespondiente(+Padre, +[IdNodo, Cost], +F, +Frontera, +Visitados, -NuevosVisitados, -NuevaFrontera)
+%
+%   Actualiza la frontera y los visitados si corresponde.
+%   Si el nodo IdNodo existe en la frontera con un costo mayor a F, lo actualizo.
+%   Si existe en los visitados con un costo mayor a F, lo borro de los visitados y lo agrego a la frontera.
+%   Si existe en cualquiera de las dos con un costo menor o igual a F, lo salteo.
+%   Si no se da ningún caso, lo agrego a la frontera.
+% 
+%   La Frontera y los Visitados una vez actualizados son devueltos en NuevaFrontera y NuevosVisitados respectivamente.
+% 
+
 agregarAListaCorrespondiente(Padre, [IdNodo, Cost], F, Frontera, Visitados, Visitados, NuevaFrontera) :-
 	member([IdNodo, CurrentCost], Frontera), % si pertenece a la frontera 
 	F < CurrentCost, % y el nuevo F es menor al ya calculado
