@@ -100,8 +100,8 @@ decide_action(Action, 'Quiero levantar un reloj...') :-
 	retractall(plandesplazamiento(_)),
 	!.
 
-% Si estoy en la misma posición que un cajón, intento levantarlo.
-decide_action(Action, 'Quiero levantar un cajon...') :-
+% Si estoy en la misma posición que un cofre, intento levantarlo.
+decide_action(Action, 'Quiero levantar un cofre...') :-
 	at(MyNode, agente, me),
 	at(MyNode, cofre, IdGold),
 	node(MyNode, PosX, PosY, _, _),
@@ -185,6 +185,4 @@ busqueda_plan(Plan, Destino, Costo):-
  	retractall(esMeta(_)),
 
  	findall(Nodo, (at(Nodo, EntityType, _), EntityType \= agente), Metas), % nuevas metas
-	seleccionar(Meta1, Metas, Resto),
-	at(Meta1, Entidad, _),
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo).
